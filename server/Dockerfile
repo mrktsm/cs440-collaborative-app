@@ -5,8 +5,10 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
+COPY knexfile.js ./
+COPY migrations ./migrations
 COPY src ./src
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["sh", "-c", "npm run migrate && npm start"]

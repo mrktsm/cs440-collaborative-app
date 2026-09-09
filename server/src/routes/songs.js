@@ -5,7 +5,7 @@ const router = Router()
 
 router.get('/', async (_request, response) => {
   const [songs] = await pool.execute(
-    `SELECT s.id, s.title, s.artist, s.genre, sn.note
+    `SELECT s.id, s.title, s.artist, s.album, s.genre, sn.note
      FROM songs s
      LEFT JOIN song_notes sn ON sn.song_id = s.id
      ORDER BY s.id`,
@@ -20,6 +20,9 @@ router.post('/', async (request, response) => {
   const artist = typeof request.body.artist === 'string'
     ? request.body.artist.trim()
     : ''
+  const album = typeof request.body.album === 'string'
+    ? request.body.album.trim()
+    : ''
   const genre = typeof request.body.genre === 'string'
     ? request.body.genre.trim()
     : ''
@@ -33,6 +36,10 @@ router.post('/', async (request, response) => {
     return response.status(400).json({ message: 'Song title is required' })
   }
 
+  if (!artist) {
+    return response.status(400).json({ message: 'Artist is required' })
+  }
+
   if (!note) {
     return response.status(400).json({ message: 'Note is required' })
   }
@@ -42,14 +49,22 @@ router.post('/', async (request, response) => {
   try {
     await connection.beginTransaction()
 
+    // Main table
     const [songResult] = await connection.execute(
-      'INSERT INTO songs (title, artist, genre) VALUES (?, ?, ?)',
-      [title, artist || null, genre || null],
+      'INSERT INTO songs (title, artist, album, genre) VALUES (?, ?, ?, ?)',
+      [title, artist, album || null, genre || null],
     )
 
+    // Kris's table
     await connection.execute(
       'INSERT INTO song_notes (song_id, note) VALUES (?, ?)',
       [songResult.insertId, note],
+    )
+
+    // Soikat's table: keep a row for the artist from the form
+    await connection.execute(
+      'INSERT INTO artists (name, bio) VALUES (?, ?)',
+      [artist, album ? `Album: ${album}` : null],
     )
 
     await connection.commit()
@@ -58,6 +73,7 @@ router.post('/', async (request, response) => {
       id: songResult.insertId,
       title,
       artist,
+      album: album || null,
       genre: genre || null,
       note,
     })
