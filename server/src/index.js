@@ -4,5 +4,5 @@ import app from './app.js'
 const port = Number(process.env.PORT) || 3000
 
 app.listen(port, () => {
-  console.log(`Click Counter API listening on port ${port}`)
+  console.log(`Song List API listening on port ${port}`)
 })

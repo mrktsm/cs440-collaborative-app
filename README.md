@@ -1,6 +1,6 @@
-# CS 440 Click Counter
+# CS 440 Song List
 
-A minimal full-stack app with one button. Clicking the button updates a counter stored in MySQL.
+A small full-stack app where people can add songs to a shared list.
 
 ## Stack
 
@@ -11,14 +11,8 @@ A minimal full-stack app with one button. Clicking the button updates a counter 
 
 ## Run
 
-1. Install and start Docker Desktop.
+1. Start Docker Desktop.
 2. Run `docker compose up --build`.
 3. Open [http://localhost:8080](http://localhost:8080).
 
 Stop the app with `docker compose down`.
-
-## API
-
-- `GET /api/counter` returns the current count.
-- `POST /api/counter` increments and returns the count.
-- `GET /api/health` checks that the Express server is running.
