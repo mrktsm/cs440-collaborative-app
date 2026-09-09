@@ -1,0 +1,61 @@
+main {
+  margin: 60px auto;
+  max-width: 600px;
+  padding: 0 20px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+}
+
+form {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+input {
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  min-width: 0;
+  padding: 8px;
+  width: 100%;
+}
+
+button {
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 8px 14px;
+}
+
+form button {
+  background: #2563eb;
+  color: white;
+}
+
+.delete-button {
+  background: transparent;
+  color: #b91c1c;
+  font-size: 18px;
+  opacity: 0;
+}
+
+.song-row:hover .delete-button,
+.delete-button:focus {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .delete-button {
+    opacity: 1;
+  }
+}
