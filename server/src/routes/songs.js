@@ -36,6 +36,10 @@ router.post('/', async (request, response) => {
     return response.status(400).json({ message: 'Song title is required' })
   }
 
+  if (!artist) {
+    return response.status(400).json({ message: 'Artist is required' })
+  }
+
   if (!note) {
     return response.status(400).json({ message: 'Note is required' })
   }
@@ -45,14 +49,22 @@ router.post('/', async (request, response) => {
   try {
     await connection.beginTransaction()
 
+    // Main table
     const [songResult] = await connection.execute(
       'INSERT INTO songs (title, artist, album, genre) VALUES (?, ?, ?, ?)',
-      [title, artist || null, album || null, genre || null],
+      [title, artist, album || null, genre || null],
     )
 
+    // Kris's table
     await connection.execute(
       'INSERT INTO song_notes (song_id, note) VALUES (?, ?)',
       [songResult.insertId, note],
+    )
+
+    // Soikat's table: keep a row for the artist from the form
+    await connection.execute(
+      'INSERT INTO artists (name, bio) VALUES (?, ?)',
+      [artist, album ? `Album: ${album}` : null],
     )
 
     await connection.commit()
