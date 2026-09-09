@@ -5,21 +5,15 @@ main {
 }
 
 ul {
-  border: 1px solid #ddd;
   list-style: none;
   padding: 0;
 }
 
 li {
   align-items: center;
-  border-bottom: 1px solid #ddd;
   display: flex;
   justify-content: space-between;
-  padding: 14px;
-}
-
-li:last-child {
-  border-bottom: 0;
+  padding: 10px 0;
 }
 
 form {
