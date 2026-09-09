@@ -6,6 +6,8 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
 COPY src ./src
+COPY knexfile.js ./
+COPY migrations ./migrations
 
 EXPOSE 3000
 

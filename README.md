@@ -16,3 +16,4 @@ A small full-stack app where people can add songs to a shared list.
 3. Open [http://localhost:8080](http://localhost:8080).
 
 Stop the app with `docker compose down`.
+
