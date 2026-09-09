@@ -42,6 +42,10 @@ form button {
   color: white;
 }
 
+.song-note {
+  color: #666;
+}
+
 .delete-button {
   background: transparent;
   color: #b91c1c;

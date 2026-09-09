@@ -8,12 +8,16 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
-    "check": "node --check src/app.js && node --check src/db.js && node --check src/index.js && node --check src/routes/songs.js"
+    "check": "node --check src/app.js && node --check src/db.js && node --check src/index.js && node --check src/routes/songs.js",
+    "migrate": "knex migrate:latest",
+    "migrate:make": "knex migrate:make",
+    "migrate:rollback": "knex migrate:rollback"
   },
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "knex": "^3.3.0",
     "mysql2": "^3.24.4"
   },
   "devDependencies": {
