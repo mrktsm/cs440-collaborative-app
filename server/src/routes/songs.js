@@ -5,7 +5,7 @@ const router = Router()
 
 router.get('/', async (_request, response) => {
   const [songs] = await pool.execute(
-    `SELECT s.id, s.title, s.artist, s.genre, sn.note
+    `SELECT s.id, s.title, s.artist, s.album, s.genre, sn.note
      FROM songs s
      LEFT JOIN song_notes sn ON sn.song_id = s.id
      ORDER BY s.id`,
@@ -19,6 +19,9 @@ router.post('/', async (request, response) => {
     : ''
   const artist = typeof request.body.artist === 'string'
     ? request.body.artist.trim()
+    : ''
+  const album = typeof request.body.album === 'string'
+    ? request.body.album.trim()
     : ''
   const genre = typeof request.body.genre === 'string'
     ? request.body.genre.trim()
@@ -43,8 +46,8 @@ router.post('/', async (request, response) => {
     await connection.beginTransaction()
 
     const [songResult] = await connection.execute(
-      'INSERT INTO songs (title, artist, genre) VALUES (?, ?, ?)',
-      [title, artist || null, genre || null],
+      'INSERT INTO songs (title, artist, album, genre) VALUES (?, ?, ?, ?)',
+      [title, artist || null, album || null, genre || null],
     )
 
     await connection.execute(
@@ -58,6 +61,7 @@ router.post('/', async (request, response) => {
       id: songResult.insertId,
       title,
       artist,
+      album: album || null,
       genre: genre || null,
       note,
     })
