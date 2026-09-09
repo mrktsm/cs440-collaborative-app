@@ -1,0 +1,9 @@
+CREATE DATABASE IF NOT EXISTS click_counter;
+USE click_counter;
+
+CREATE TABLE IF NOT EXISTS counter (
+  id INT NOT NULL PRIMARY KEY,
+  value INT NOT NULL DEFAULT 0
+);
+
+INSERT IGNORE INTO counter (id, value) VALUES (1, 0);
