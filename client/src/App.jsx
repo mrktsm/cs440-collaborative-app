@@ -9,15 +9,27 @@ const API_BASE = import.meta.env.VITE_API_URL ?? ''
 
 function App() {
   const [songs, setSongs] = useState([])
+  const [loadError, setLoadError] = useState('')
   const [title, setTitle] = useState('')
   const [artist, setArtist] = useState('')
   const [genre, setGenre] = useState('')
   const [note, setNote] = useState('')
+  // Onil's addition: release year on the song, plus a rating and
+  // reviewer name stored in their own table (song_ratings).
+  const [releaseYear, setReleaseYear] = useState('')
+  const [rating, setRating] = useState('')
+  const [reviewerName, setReviewerName] = useState('')
 
   useEffect(() => {
     fetch(`${API_BASE}/api/songs`)
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Unable to load songs')
+        }
+        return response.json()
+      })
       .then(setSongs)
+      .catch((error) => setLoadError(error.message))
   }, [])
 
   async function addSong(event) {
@@ -26,7 +38,15 @@ function App() {
     const response = await fetch(`${API_BASE}/api/songs`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, artist, genre, note }),
+      body: JSON.stringify({
+        title,
+        artist,
+        genre,
+        note,
+        release_year: releaseYear,
+        rating,
+        reviewer_name: reviewerName,
+      }),
     })
     const song = await response.json()
 
@@ -35,6 +55,9 @@ function App() {
     setArtist('')
     setGenre('')
     setNote('')
+    setReleaseYear('')
+    setRating('')
+    setReviewerName('')
   }
 
   async function deleteSong(id) {
@@ -46,6 +69,8 @@ function App() {
     <main>
       <h1>Song List</h1>
 
+      {loadError && <p role="alert">{loadError}</p>}
+
       <ul>
         {songs.map((song) => (
           <li className="song-row" key={song.id}>
@@ -53,7 +78,10 @@ function App() {
               <strong>{song.title}</strong>
               {song.artist && ` — ${song.artist}`}
               {song.genre && ` (${song.genre})`}
+              {song.release_year && ` [${song.release_year}]`}
               {song.note && <em className="song-note"> — “{song.note}”</em>}
+              {song.rating && ` ★${song.rating}`}
+              {song.reviewer_name && ` by ${song.reviewer_name}`}
             </span>
             <button
               className="delete-button"
@@ -89,6 +117,24 @@ function App() {
               onChange={(event) => setNote(event.target.value)}
               placeholder="Note"
               required
+            />
+            <input
+              value={releaseYear}
+              onChange={(event) => setReleaseYear(event.target.value)}
+              placeholder="Release year"
+              type="number"
+            />
+            <input
+              value={rating}
+              onChange={(event) => setRating(event.target.value)}
+              placeholder="Rating (1-5)"
+              type="number"
+              required
+            />
+            <input
+              value={reviewerName}
+              onChange={(event) => setReviewerName(event.target.value)}
+              placeholder="Reviewer name"
             />
             <button type="submit">Add</button>
           </form>

@@ -5,9 +5,10 @@ const router = Router()
 
 router.get('/', async (_request, response) => {
   const [songs] = await pool.execute(
-    `SELECT s.id, s.title, s.artist, s.genre, sn.note
+    `SELECT s.id, s.title, s.artist, s.genre, s.release_year, sn.note, sr.rating, sr.reviewer_name
      FROM songs s
      LEFT JOIN song_notes sn ON sn.song_id = s.id
+     LEFT JOIN song_ratings sr ON sr.song_id = s.id
      ORDER BY s.id`,
   )
   response.json(songs)
@@ -29,6 +30,18 @@ router.post('/', async (request, response) => {
     ? request.body.note.trim()
     : ''
 
+  // Onil's addition: release year column on songs, plus a rating
+  // stored in its own table (song_ratings), linked back to the song.
+  const releaseYear = typeof request.body.release_year === 'string' || typeof request.body.release_year === 'number'
+    ? parseInt(request.body.release_year, 10)
+    : null
+  const rating = typeof request.body.rating === 'string' || typeof request.body.rating === 'number'
+    ? parseInt(request.body.rating, 10)
+    : null
+  const reviewerName = typeof request.body.reviewer_name === 'string'
+    ? request.body.reviewer_name.trim()
+    : ''
+
   if (!title) {
     return response.status(400).json({ message: 'Song title is required' })
   }
@@ -37,19 +50,28 @@ router.post('/', async (request, response) => {
     return response.status(400).json({ message: 'Note is required' })
   }
 
+  if (!rating) {
+    return response.status(400).json({ message: 'Rating is required' })
+  }
+
   const connection = await pool.getConnection()
 
   try {
     await connection.beginTransaction()
 
     const [songResult] = await connection.execute(
-      'INSERT INTO songs (title, artist, genre) VALUES (?, ?, ?)',
-      [title, artist || null, genre || null],
+      'INSERT INTO songs (title, artist, genre, release_year) VALUES (?, ?, ?, ?)',
+      [title, artist || null, genre || null, releaseYear],
     )
 
     await connection.execute(
       'INSERT INTO song_notes (song_id, note) VALUES (?, ?)',
       [songResult.insertId, note],
+    )
+
+    await connection.execute(
+      'INSERT INTO song_ratings (song_id, rating, reviewer_name) VALUES (?, ?, ?)',
+      [songResult.insertId, rating, reviewerName || null],
     )
 
     await connection.commit()
@@ -59,7 +81,10 @@ router.post('/', async (request, response) => {
       title,
       artist,
       genre: genre || null,
+      release_year: releaseYear,
       note,
+      rating,
+      reviewer_name: reviewerName || null,
     })
   } catch (error) {
     await connection.rollback()
