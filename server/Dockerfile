@@ -5,9 +5,9 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-COPY src ./src
+COPY knexfile.js ./
 COPY migrations ./migrations
-COPY knexfile.js ./knexfile.js
+COPY src ./src
 
 EXPOSE 3000
 

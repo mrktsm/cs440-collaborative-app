@@ -1,6 +1,7 @@
 import cors from 'cors'
 import express from 'express'
 import songRouter from './routes/songs.js'
+import playlistRouter from './routes/playlist-entries.js'
 
 const app = express()
 
@@ -12,6 +13,7 @@ app.get('/api/health', (_request, response) => {
 })
 
 app.use('/api/songs', songRouter)
+app.use('/api/playlist-entries', playlistRouter)
 
 app.use((request, response) => {
   response.status(404).json({ message: `Route not found: ${request.path}` })
