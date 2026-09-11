@@ -9,6 +9,7 @@ const API_BASE = import.meta.env.VITE_API_URL ?? ''
 
 function App() {
   const [songs, setSongs] = useState([])
+  const [loadError, setLoadError] = useState('')
   const [title, setTitle] = useState('')
   const [artist, setArtist] = useState('')
   const [duration, setDuration] = useState('')
@@ -17,11 +18,22 @@ function App() {
   const [saving, setSaving] = useState(false)
   const [genre, setGenre] = useState('')
   const [note, setNote] = useState('')
+  // Onil's addition: release year on the song, plus a rating and
+  // reviewer name stored in their own table (song_ratings).
+  const [releaseYear, setReleaseYear] = useState('')
+  const [rating, setRating] = useState('')
+  const [reviewerName, setReviewerName] = useState('')
 
   useEffect(() => {
     fetch(`${API_BASE}/api/songs`)
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Unable to load songs')
+        }
+        return response.json()
+      })
       .then(setSongs)
+      .catch((error) => setLoadError(error.message))
   }, [])
 
   async function addSong(event) {
@@ -34,7 +46,17 @@ function App() {
       const response = await fetch(`${API_BASE}${toPlaylist ? '/api/playlist-entries' : '/api/songs'}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, artist, genre, note, duration_seconds: Number(duration), playlist_name: playlist }),
+        body: JSON.stringify({
+          title,
+          artist,
+          genre,
+          note,
+          release_year: releaseYear === '' ? null : Number(releaseYear),
+          rating: rating === '' ? null : Number(rating),
+          reviewer_name: reviewerName,
+          duration_seconds: Number(duration),
+          playlist_name: playlist,
+        }),
       })
       const song = await response.json()
       if (!response.ok) throw new Error(song.message || 'Could not add song')
@@ -46,6 +68,9 @@ function App() {
       setNote('')
       setDuration('')
       setPlaylist('')
+      setReleaseYear('')
+      setRating('')
+      setReviewerName('')
     } catch (error) {
       setMessage(error.message)
     } finally {
@@ -62,6 +87,8 @@ function App() {
     <main>
       <h1>Song List</h1>
 
+      {loadError && <p role="alert">{loadError}</p>}
+
       <ul>
         {songs.map((song) => (
           <li className="song-row" key={song.id}>
@@ -69,7 +96,10 @@ function App() {
               <strong>{song.title}</strong>
               {song.artist && ` — ${song.artist}`}
               {song.genre && ` (${song.genre})`}
+              {song.release_year && ` [${song.release_year}]`}
               {song.note && <em className="song-note"> — “{song.note}”</em>}
+              {song.rating && ` ★${song.rating}`}
+              {song.reviewer_name && ` by ${song.reviewer_name}`}
             </span>
             <button
               className="delete-button"
@@ -105,6 +135,24 @@ function App() {
               value={note}
               onChange={(event) => setNote(event.target.value)}
               placeholder="Note (required for Add)"
+            />
+            <input
+              value={releaseYear}
+              onChange={(event) => setReleaseYear(event.target.value)}
+              placeholder="Release year"
+              type="number"
+            />
+            <input
+              value={rating}
+              onChange={(event) => setRating(event.target.value)}
+              placeholder="Rating (1-5)"
+              type="number"
+              required
+            />
+            <input
+              value={reviewerName}
+              onChange={(event) => setReviewerName(event.target.value)}
+              placeholder="Reviewer name"
             />
             <input value={duration} onChange={(event) => setDuration(event.target.value)}
               type="number" min="1" max="4294967295" step="1" placeholder="Seconds" aria-label="Duration in seconds" />

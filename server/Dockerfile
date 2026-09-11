@@ -8,8 +8,6 @@ RUN npm ci --omit=dev
 COPY knexfile.js ./
 COPY migrations ./migrations
 COPY src ./src
-COPY knexfile.js ./
-COPY migrations ./migrations
 
 EXPOSE 3000
 
